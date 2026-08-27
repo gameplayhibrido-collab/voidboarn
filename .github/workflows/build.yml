@@ -15,11 +15,12 @@ jobs:
 
       - name: Descompactar o Mod
         run: |
+          rm -rf Voidborn
           unzip -o *.zip
           if [ -d "Voidborn" ]; then
-            cp -rn Voidborn/* .
+            cp -rn Voidborn/* . 2>/dev/null || true
           fi
-          chmod +x gradlew
+          find . -name "gradlew" -exec chmod +x {} +
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -28,10 +29,16 @@ jobs:
           distribution: 'temurin'
 
       - name: Compilar (.java para .class)
-        run: ./gradlew build
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew build
+          else
+            cd $(dirname $(find . -name "gradlew" | head -n 1))
+            ./gradlew build
+          fi
 
       - name: Enviar arquivo .jar pronto
         uses: actions/upload-artifact@v4
         with:
           name: Voidborn-Mod-JAR
-          path: build/libs/*.jar
+          path: "**/build/libs/*.jar"
