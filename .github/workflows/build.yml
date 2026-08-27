@@ -33,7 +33,7 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew build --no-daemon
+          ./gradlew jar -x test --stacktrace --no-daemon
 
       - name: Enviar arquivo .jar pronto
         uses: actions/upload-artifact@v4
