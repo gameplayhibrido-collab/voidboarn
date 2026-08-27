@@ -1,0 +1,37 @@
+name: Compilar Mod Voidborn
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Descompactar o Mod
+        run: |
+          unzip -o *.zip
+          if [ -d "Voidborn" ]; then
+            cp -rn Voidborn/* .
+          fi
+          chmod +x gradlew
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar (.java para .class)
+        run: ./gradlew build
+
+      - name: Enviar arquivo .jar pronto
+        uses: actions/upload-artifact@v4
+        with:
+          name: Voidborn-Mod-JAR
+          path: build/libs/*.jar
