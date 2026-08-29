@@ -54,9 +54,17 @@ jobs:
           cd "$PROJECT_DIR"
 
           if [ ! -f "gradlew" ]; then
-            echo "Gradle Wrapper não encontrado. Criando..."
+            echo "Gradle Wrapper não encontrado."
 
-            gradle wrapper --gradle-version 8.8
+            echo "Baixando Gradle 8.8..."
+
+            wget https://services.gradle.org/distributions/gradle-8.8-bin.zip
+
+            unzip -q gradle-8.8-bin.zip
+
+            echo "Criando Gradle Wrapper..."
+
+            ./gradle-8.8/bin/gradle wrapper --gradle-version 8.8
           fi
 
           chmod +x gradlew
