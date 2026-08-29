@@ -2,11 +2,15 @@ name: Compilar Mod Voidborn
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - "main"
+      - "master"
   workflow_dispatch:
+
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -22,46 +26,50 @@ jobs:
           distribution: 'temurin'
 
 
-      - name: Extrair ZIP do projeto
+      - name: Extrair projeto do ZIP
         run: |
           mkdir projeto
 
           unzip -o *.zip -d projeto
 
-          echo "Arquivos encontrados:"
-          find projeto -name "build.gradle"
-          find projeto -name "gradlew"
+          echo "Procurando projeto Forge..."
 
-
-      - name: Encontrar projeto Forge
-        run: |
           BUILD=$(find projeto -name "build.gradle" | head -n 1)
 
           if [ -z "$BUILD" ]; then
-            echo "Nenhum build.gradle encontrado"
+            echo "ERRO: build.gradle não encontrado"
             exit 1
           fi
 
-          DIR=$(dirname "$BUILD")
+          PROJECT_DIR=$(dirname "$BUILD")
 
-          echo "Projeto encontrado em:"
-          echo "$DIR"
+          echo "Projeto encontrado:"
+          echo "$PROJECT_DIR"
 
-          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
 
 
-      - name: Dar permissão ao Gradle
+      - name: Preparar Gradle Wrapper
         run: |
-          chmod +x "$PROJECT_DIR/gradlew"
+          cd "$PROJECT_DIR"
+
+          if [ ! -f "gradlew" ]; then
+            echo "Gradle Wrapper não encontrado. Criando..."
+
+            gradle wrapper --gradle-version 8.8
+          fi
+
+          chmod +x gradlew
 
 
       - name: Compilar Mod
         run: |
           cd "$PROJECT_DIR"
+
           ./gradlew build -x test --no-daemon
 
 
-      - name: Enviar JAR
+      - name: Enviar JAR pronto
         uses: actions/upload-artifact@v4
         with:
           name: Voidborn-Mod-JAR
